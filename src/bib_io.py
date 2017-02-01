@@ -1,8 +1,8 @@
-class Item:
+class BibReader:
     pass
 
 
-class Article(Item):
+class BibWriter:
     pass
 
 
