@@ -1,15 +1,15 @@
 BIBLIOGRAPHY = {
     'terra': {
-        'article': '$authors ($year$letter). $title. $journal $volume($issue), $pages.'
+        'article': '{authors} ({year}{letter}). {title}. {journal} {volume}({number}), {pages}.'
     },
     'graduttaja': {
-        'article': '$authors $year$letter. $title. $journal $issue/$volume, $pages.'
+        'article': '{authors} {year}{letter}. {title}. {journal} {number}/{volume}, {pages}.'
     }
 }
 
 
 CITATION = {
     'terra': {
-        'article': '$shortname $year$letter, $citationpages'
+        'article': '{shortname} {year}{letter}, {citationpages}'
     }
 }
