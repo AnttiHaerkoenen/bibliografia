@@ -1,9 +1,11 @@
 class BibReader:
-    pass
+    def __init__(self, file):
+        pass
 
 
 class BibWriter:
-    pass
+    def __init__(self, file):
+        pass
 
 
 if __name__ == '__main__':
