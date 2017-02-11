@@ -1,10 +1,10 @@
-from src import templates
-from src.exceptions import BibKeyError, BibValueError
+from src import templates, string_processing
+from src.exceptions import *
 
 
 class Item:
-    def __init__(self, data, style):
-        self.data = data
+    def __init__(self, data, style, from_string=True):
+        self.data = string_processing.data_from_string(data) if from_string else data
         self.style = style
         self.type = data['type']
         self.template = templates.BIBLIOGRAPHY.get(self.style).get(self.type, None)

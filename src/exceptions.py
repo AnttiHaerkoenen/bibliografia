@@ -12,3 +12,7 @@ class BibValueError(ValueError, BibException):
 
 class BibIndexError(IndexError, BibException):
     pass
+
+
+class BibTypeError(TypeError, BibException):
+    pass
