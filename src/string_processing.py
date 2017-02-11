@@ -9,6 +9,11 @@ def data_from_string(text):
     data['type'] = text[:cut]
     table = str.maketrans('', '', '{}')
     text = text[cut:].translate(table)
-    print(text)
+    text = text.split(',\n')
+    data['id'] = text[0]
+
+    for line in data[1:]:
+        k, v = line.split(' = ')
+        data[k] = v
 
     return data
