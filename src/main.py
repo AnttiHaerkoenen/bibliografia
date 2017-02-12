@@ -11,4 +11,5 @@ if __name__ == '__main__':
     os.chdir(os.path.join(os.path.abspath(os.path.pardir), DATA_DIR))
     reader = bib_io.BibReader('bib.bib')
     d = reader[0]
-    a = items.Item(d, 'graduttaja')
+    a = items.Item(d, 'graduttaja', from_string=True)
+    print(a)

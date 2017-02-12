@@ -1,5 +1,3 @@
-import string
-
 from src.exceptions import *
 
 
@@ -12,7 +10,7 @@ def data_from_string(text):
     text = text.split(',\n')
     data['id'] = text[0]
 
-    for line in data[1:]:
+    for line in text[1:]:
         k, v = line.split(' = ')
         data[k] = v
 

@@ -6,8 +6,12 @@ class Item:
     def __init__(self, data, style, from_string=True):
         self.data = string_processing.data_from_string(data) if from_string else data
         self.style = style
-        self.type = data['type']
-        self.template = templates.BIBLIOGRAPHY.get(self.style).get(self.type, None)
+        self.type = self.data['type']
+        self.format_authors()
+        if self.type in templates.BIBLIOGRAPHY[self.style]:
+            self.template = templates.BIBLIOGRAPHY[self.style][self.type]
+        else:
+            self.template = templates.BIBLIOGRAPHY[self.style]['misc']
         self.citations = []
 
     def __str__(self):
