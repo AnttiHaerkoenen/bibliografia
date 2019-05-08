@@ -1,5 +1,6 @@
 import argparse
 import os
+import glob
 
 
 CASES = {
@@ -9,12 +10,30 @@ CASES = {
 }
 
 
+def confirm(
+        names: list,
+        new_names: list,
+) -> bool:
+    print("Following files will be renamed:")
+    for i, name in enumerate(names):
+        print(f"{name} -> {new_names[i]}")
+    answer = input("Are you sure? (yes/no) ")
+    if answer.lower() == "yes":
+        print("Renaming...")
+        return True
+    print("Renaming canceled.")
+    return False
+
+
 def fix_filenames(
-        files,
+        files: list,
         replace_whitespaces=None,
         remove=None,
         case=None,
 ):
+    if '*' in files[0]:
+        raise FileNotFoundError(f"No files found with {files[0]}")
+    new_names = []
     for fname in files:
         new: str = fname
         if replace_whitespaces:
@@ -23,7 +42,11 @@ def fix_filenames(
             new = new.replace(remove, '')
         if case in CASES:
             new = CASES[case](new)
-        os.rename(fname, new)
+        new_names.append(new)
+
+    if confirm(files, new_names):
+        for i, f in enumerate(files):
+            os.rename(f, new_names[i])
 
 
 if __name__ == '__main__':
@@ -52,8 +75,9 @@ if __name__ == '__main__':
         help=f"Which case to use {tuple(CASES.keys())}, default None",
     )
     args = parser.parse_args()
+    files = args.files
     fix_filenames(
-        args.files,
+        files,
         replace_whitespaces=args.whitespace,
         remove=args.remove,
         case=args.case,
