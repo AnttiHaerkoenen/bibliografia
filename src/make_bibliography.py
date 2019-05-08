@@ -4,6 +4,9 @@ import attr
 import bibtexparser
 
 
+styles = dict()
+
+
 def make_bibliography(
         database,
         target,
