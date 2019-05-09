@@ -1,11 +1,12 @@
-def _handle_entries(entries: dict):
-    return dict()
+from collections import OrderedDict
+
+from src.entry import Entry
 
 
 class Bibliography:
     def __init__(self, entries: dict):
-        self._entries: dict = _handle_entries(entries)
-        self._get_letters()
+        self._entries = {k, Entry(v) for k, v in entries.items()}
+        self._set_letters()
 
     @property
     def entries_dict(self):
@@ -15,8 +16,10 @@ class Bibliography:
     def entries(self):
         return [e.data for e in self._entries.values()]
 
-    def _get_letters(self):
-        pass
+    def _set_letters(self):
+        self._entries = sorted(lambda e: e['authors'][0][0], e['year'])
+        for k, e in self._entries.items():
+            if e.data.equals(last_e.data):
 
 
 if __name__ == '__main__':
