@@ -4,11 +4,13 @@ import os
 import bibtexparser
 from mako.template import Template
 
+from src.bibliography import Bibliography
+
 
 TEMPLATE_DIR = r'../templates'
-OUTPUT_DIR = r'../output'
 TEMPLATES = {
     'graduttaja': 'graduttaja.mako',
+    # 'terra': 'terra.mako',
 }
 
 
@@ -17,13 +19,15 @@ def make_bibliography(
         output,
         style,
 ):
+    with open(database) as fopen:
+        database = bibtexparser.load(fopen)
+    articles = list(filter(lambda e: e['ENTRYTYPE'] in 'article incollection misc book'.split(), database.entries))
+    entries = Bibliography(entries)
     os.chdir(TEMPLATE_DIR)
-    items = ['a', 3, 'c']
     template = Template(filename=TEMPLATES[style])
 
-    os.chdir(OUTPUT_DIR)
     with open(output, 'w') as fopen:
-        print(template.render(items=items), file=fopen)
+        print(template.render(entries=entries), file=fopen)
 
 
 def main():
@@ -53,8 +57,8 @@ def main():
 
 if __name__ == '__main__':
     make_bibliography(
-        database=None,
-        output=r'testi.txt',
+        database=r'../data/bib.bib',
+        output=r'../output/testi.html',
         style='graduttaja',
     )
     # main()
