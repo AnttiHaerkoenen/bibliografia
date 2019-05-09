@@ -1,21 +1,32 @@
 import argparse
+import os
 
-import attr
 import bibtexparser
+from mako.template import Template
 
 
-styles = dict()
+TEMPLATE_DIR = r'../templates'
+OUTPUT_DIR = r'../output'
+TEMPLATES = {
+    'graduttaja': 'graduttaja.mako',
+}
 
 
 def make_bibliography(
         database,
-        target,
+        output,
         style,
 ):
-    pass
+    os.chdir(TEMPLATE_DIR)
+    items = ['a', 3, 'c']
+    template = Template(filename=TEMPLATES[style])
+
+    os.chdir(OUTPUT_DIR)
+    with open(output, 'w') as fopen:
+        print(template.render(items=items), file=fopen)
 
 
-if __name__ == '__main__':
+def main():
     argparser = argparse.ArgumentParser("Create text bibliography from bibtex")
     argparser.add_argument(
         'db',
@@ -30,11 +41,20 @@ if __name__ == '__main__':
     argparser.add_argument(
         '--style',
         target='style',
-        help=f"Style to use {tuple(styles.keys())}",
+        help=f"Style to use {tuple(TEMPLATES)}",
     )
     args = argparser.parse_args()
     make_bibliography(
         database=args.db,
-        target=args.target,
-        style=args.style
+        output=args.output,
+        style=args.style,
     )
+
+
+if __name__ == '__main__':
+    make_bibliography(
+        database=None,
+        output=r'testi.txt',
+        style='graduttaja',
+    )
+    # main()
