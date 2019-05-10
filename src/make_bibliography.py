@@ -3,6 +3,7 @@ import os
 
 import bibtexparser
 from mako.template import Template
+from mako.lookup import TemplateLookup
 
 from src.bibliography import Bibliography
 
@@ -19,15 +20,20 @@ def make_bibliography(
         output,
         style,
 ):
+    parser = bibtexparser.bparser.BibTexParser()
+    parser.ignore_nonstandard_types = False
+    parser.homogenize_fields = True
+    parser.add_missing_from_crossref = True
     with open(database) as fopen:
-        database = bibtexparser.load(fopen)
+        database = bibtexparser.load(fopen, parser=parser)
     articles = list(filter(lambda e: e['ENTRYTYPE'] in 'article incollection misc book'.split(), database.entries))
-    entries = Bibliography(entries)
+    entries = Bibliography(database.entries_dict)
     os.chdir(TEMPLATE_DIR)
-    template = Template(filename=TEMPLATES[style])
+    look_up = TemplateLookup(directories=TEMPLATE_DIR, input_encoding='utf-8')
+    template = Template(filename=TEMPLATES[style], lookup=look_up)
 
     with open(output, 'w') as fopen:
-        print(template.render(entries=entries), file=fopen)
+        print(template.render(entries=entries.entries), file=fopen)
 
 
 def main():
