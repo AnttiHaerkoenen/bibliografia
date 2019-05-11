@@ -35,9 +35,12 @@ def handle_authors(
     """
     if 'author' in entry:
         authors = entry['author'].split(' and ')
-        auths = [bibcust.splitname(name) for name in authors]
-        for au in auths:
-            print(au)
+        authors_ = []
+        for au in authors:
+                au_dict = bibcust.splitname(name)
+                au_ = {k: (v[0] if v else '') for k, v in au_dict}
+                au_['first'] = au_dict['first']
+                authors_.append(au_)
     else:
         entry['author'] = None
     return entry
