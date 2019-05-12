@@ -1,8 +1,7 @@
 from collections import OrderedDict
-from operator import attrgetter
-from typing import Sequence
+from collections.abc import Sequence
 
-import bibtexparser.customization as bibcust
+import bibtexparser.customization as bib_custom
 
 
 def handle_authors(
@@ -12,10 +11,10 @@ def handle_authors(
     Sets 'author' to:
         1) list of dicts of lists
         (each author passed through bibtexparser.customization.splitname)
-        2) None, if 'author' not in entry
+        2) None, if 'author' not in item_
 
     Example:
-        entry['author'] = [
+        item_['author'] = [
                 {
                     'first': ['J.', 'L.'],
                     'last': 'Bredas',
@@ -30,14 +29,14 @@ def handle_authors(
                 },
             ]
     :param seps: Separators to use, default ' and ',
-    :param entry: entry-dict
-    :return: entry-dict with formatted author
+    :param entry: item_-dict
+    :return: item_-dict with formatted author
     """
     if 'author' in entry:
         authors = entry['author'].split(' and ')
         authors_ = []
         for au in authors:
-            au_dict = bibcust.splitname(au)
+            au_dict = bib_custom.splitname(au)
             au_dict_new = {k: (v[0] if v else '') for k, v in au_dict.items()}
             au_dict_new['first'] = au_dict['first']
             authors_.append(au_dict_new)
@@ -51,10 +50,10 @@ def handle_date(entry: dict) -> dict:
     """
     Sets 'date' to:
         1) list of year, month and day
-        2) None if 'date' not in entry
+        2) None if 'date' not in item_
     Sets 'year' to:
         1) date[0]
-        2) None if 'date' not in entry
+        2) None if 'date' not in item_
     :param entry:
     :return:
     """
@@ -75,10 +74,10 @@ def handle_pages(
     """
     Sets 'pages' to:
         1) list of page numbers
-        2) None if 'date' not in entry
+        2) None if 'date' not in item_
     :param seps: Sequence of separators to use (in order)
     :param entry: dict
-    :return: entry dict
+    :return: item_ dict
     """
     if 'pages' in entry:
         pages = entry['pages']
@@ -92,17 +91,17 @@ def handle_pages(
 
 def handle_entry(entry: dict) -> dict:
     """
-    Reforms entry using functions from bibtexparser.customization
+    Reforms item_ using functions from bibtexparser.customization
     and handle_authors
     :param entry: parsed bibtex-record as a dict
     :return: standardised record as a dict
     """
-    entry = bibcust.convert_to_unicode(entry)
+    entry = bib_custom.convert_to_unicode(entry)
     entry = handle_authors(entry)
     entry = handle_pages(entry)
     entry = handle_date(entry)
-    entry = bibcust.type(entry)
-    entry = bibcust.doi(entry)
+    entry = bib_custom.type(entry)
+    entry = bib_custom.doi(entry)
     for field in 'number volume doi journaltitle'.split():
         if field not in entry:
             entry[field] = None
@@ -114,28 +113,70 @@ class Bibliography:
         self.entries_dict: OrderedDict = OrderedDict(
             {k: handle_entry(v) for k, v in entries.items()}
         )
-        self._set_duplicate_number()
+        self._handle_duplicates()
 
     @property
     def entries(self) -> list:
         return [e for e in self.entries_dict.values()]
 
-    def _set_duplicate_number(self):
-        self.entries_dict = OrderedDict(sorted(
-            self.entries_dict, key=lambda e: attrgetter(e[1], 'author', 'year')
-        ))
-        number = 0
-        last_author_year = None, None
-        for k, entry in self.entries_dict.items():
-            author_year = attrgetter(entry, 'author', 'year')
-            if author_year == last_author_year:
-                number = + 1
+    @property
+    def authors_years_dict(self) -> dict:
+        return {k: self.author_year_getter(entry) for k, entry in self.entries_dict.items()}
+
+    @property
+    def authors_years(self) -> list:
+        return [entry for entry in self.authors_years_dict.values()]
+
+    @property
+    def unique_authors_years(self) -> dict:
+        unique_authors_years = {}
+        for k, v in self.authors_years_dict.items():
+            if v in unique_authors_years:
+                unique_authors_years[v].append(k)
             else:
-                number = 0
-            entry['letter_number'] = number
-            last_author_year = author_year
+                unique_authors_years[v] = [k]
+        return unique_authors_years
+
+    def sort(self):
+        self.entries_dict = OrderedDict(sorted(
+            self.entries_dict.items(),
+            key=lambda key_val: self.author_year_getter(key_val[1]),
+        ))
+
+    @staticmethod
+    def author_year_getter(entry):
+        author = entry['author']
+        if not author:
+            author = tuple()
+        elif len(author) <= 3:
+            author = tuple([au['last'] for au in author])
+        else:
+            author = author[0]['last'], 'et al.'
+        return author, entry['year']
+
+    def _handle_duplicates(self):
+        self.sort()
+
+        # delete duplicates
+        duplicates = []
+        last_entry = None
+        for k, entry in self.entries_dict.items():
+            if entry == last_entry:
+                duplicates.append(k)
+            last_entry = entry
+        for k in duplicates:
+            self.entries_dict.pop(k, None)
+
+        # set numbers/letters for pseudo-duplicates
+        for k, v in self.unique_authors_years.items():
+            if 1 < len(v):
+                for i, id_ in enumerate(v):
+                    self.entries_dict[id_]['letter_number'] = i + 1
+            else:
+                id_ = v[0]
+                self.entries_dict[id_]['letter_number'] = None
 
 
 if __name__ == '__main__':
     n = "Orti, E. and Bredas, J. L. and Clarisse, C.".split(' and ')
-    print(bibcust.splitname("von Wright, Georg Henrik"))
+    print(bib_custom.splitname("von Wright, Georg Henrik"))

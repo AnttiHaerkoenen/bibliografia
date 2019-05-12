@@ -1,6 +1,8 @@
 ## -*- encoding: utf-8 -*-
 <%inherit file="bibliography_base.html"/>
 <%
+    import string
+
     def format_author(entry):
         authors = entry['author']
         if not authors:
@@ -36,9 +38,15 @@
             return f", doi:{doi}"
         return ""
 
+    def format_duplicate_letter(entry):
+        number = entry['letter_number']
+        if number:
+            return string.ascii_lowercase[number - 1]
+        return ""
+
     def article(entry):
         entry['numvol'] = format_numvol(entry)
-        return "{author} {year}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
+        return "{author} {year}{duplicate_letter}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
 
     def book(entry):
         return "kirja: " + entry['ID']
@@ -69,7 +77,7 @@
         entry['author'] = format_author(entry)
         entry['pages'] = format_pages(entry)
         entry['doi'] = format_doi(entry)
-        entry['duplicate_letter'] = handle_duplicate_letter(entry)
+        entry['duplicate_letter'] = format_duplicate_letter(entry)
         if type_ not in styles:
             type_ = 'misc'
         return styles[type_](entry)
