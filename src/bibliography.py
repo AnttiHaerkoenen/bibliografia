@@ -114,14 +114,26 @@ class Bibliography:
         self.entries_dict: OrderedDict = OrderedDict(
             {k: handle_entry(v) for k, v in entries.items()}
         )
-        self._set_letters()
+        self._set_duplicate_number()
 
     @property
     def entries(self) -> list:
         return [e for e in self.entries_dict.values()]
 
-    def _set_letters(self):
-        pass
+    def _set_duplicate_number(self):
+        self.entries_dict = OrderedDict(sorted(
+            self.entries_dict, key=lambda e: attrgetter(e[1], 'author', 'year')
+        ))
+        number = 0
+        last_author_year = None, None
+        for k, entry in self.entries_dict.items():
+            author_year = attrgetter(entry, 'author', 'year')
+            if author_year == last_author_year:
+                number = + 1
+            else:
+                number = 0
+            entry['letter_number'] = number
+            last_author_year = author_year
 
 
 if __name__ == '__main__':

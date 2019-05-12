@@ -20,8 +20,25 @@
         if len(pages) == 2:
             return f", {pages[0]}–{pages[1]}"
 
+    def format_numvol(entry):
+        num, vol = entry['number'], entry['volume']
+        if not vol:
+            vol = entry['year'] if 'year' in entry else None
+        if num and vol:
+            return f" {num}/{vol}"
+        elif vol:
+            return f" {vol}"
+        return ""
+
+    def format_doi(entry):
+        doi = entry['doi']
+        if doi:
+            return f", doi:{doi}"
+        return ""
+
     def article(entry):
-        return "{author} {year}. {title}. {journaltitle} {number}/{volume}{pages}, doi:{doi}.".format(**entry)
+        entry['numvol'] = format_numvol(entry)
+        return "{author} {year}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
 
     def book(entry):
         return "kirja: " + entry['ID']
@@ -51,14 +68,19 @@
         type_ = entry['ENTRYTYPE']
         entry['author'] = format_author(entry)
         entry['pages'] = format_pages(entry)
+        entry['doi'] = format_doi(entry)
+        entry['duplicate_letter'] = handle_duplicate_letter(entry)
         if type_ not in styles:
             type_ = 'misc'
         return styles[type_](entry)
-%><b>Tutkimuskirjallisuus</b>
-<br><br>
-% for entry in entries:
-    %if isinstance(entry, dict):
-        ${render_item(entry)}
-        <br><br>
-    %endif
-% endfor
+%>
+<p style="font-size: 12px; row-gap: 1.5px">
+    <b>Tutkimuskirjallisuus</b>
+    <br><br>
+    % for entry in entries:
+        %if isinstance(entry, dict):
+            ${render_item(entry)}
+            <br><br>
+        %endif
+    % endfor
+</p>
