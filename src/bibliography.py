@@ -37,10 +37,11 @@ def handle_authors(
         authors = entry['author'].split(' and ')
         authors_ = []
         for au in authors:
-                au_dict = bibcust.splitname(name)
-                au_ = {k: (v[0] if v else '') for k, v in au_dict}
-                au_['first'] = au_dict['first']
-                authors_.append(au_)
+            au_dict = bibcust.splitname(au)
+            au_dict_new = {k: (v[0] if v else '') for k, v in au_dict.items()}
+            au_dict_new['first'] = au_dict['first']
+            authors_.append(au_dict_new)
+        entry['author'] = authors_
     else:
         entry['author'] = None
     return entry
@@ -105,6 +106,7 @@ def handle_entry(entry: dict) -> dict:
     for field in 'number volume doi journaltitle'.split():
         if field not in entry:
             entry[field] = None
+    print(entry)
     return entry
 
 
