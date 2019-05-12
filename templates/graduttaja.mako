@@ -21,15 +21,19 @@
             return f", {pages[0]}–{pages[1]}"
 
     def article(entry):
-        entry['author'] = format_author(entry)
-        entry['pages'] = format_pages(entry)
         return "{author} {year}. {title}. {journaltitle} {number}/{volume}{pages}, doi:{doi}.".format(**entry)
 
     def book(entry):
         return "kirja: " + entry['ID']
 
+    def thesis(entry):
+        return "väitöskirja: " + entry['ID']
+
     def incollection(entry):
         return "kokoelmassa: " + entry['ID']
+
+    def online(entry):
+        return "netistä: " + entry['ID']
 
     def misc(entry):
         return "sekalaista: " + entry['ID']
@@ -38,11 +42,15 @@
         'article': article,
         'book': book,
         'incollection': incollection,
+        'online': online,
+        'thesis': thesis,
         'misc': misc,
     }
 
     def render_item(entry):
         type_ = entry['ENTRYTYPE']
+        entry['author'] = format_author(entry)
+        entry['pages'] = format_pages(entry)
         if type_ not in styles:
             type_ = 'misc'
         return styles[type_](entry)
