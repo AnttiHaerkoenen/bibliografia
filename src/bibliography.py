@@ -3,6 +3,8 @@ from collections.abc import Sequence
 
 import bibtexparser.customization as bib_custom
 
+from .entry import Entry
+
 
 def handle_authors(
         entry: dict,
@@ -105,7 +107,7 @@ def handle_entry(entry: dict) -> dict:
     for field in 'number volume doi journaltitle'.split():
         if field not in entry:
             entry[field] = None
-    return entry
+    return Entry(entry)
 
 
 class Bibliography:
