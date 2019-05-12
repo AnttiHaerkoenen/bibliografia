@@ -106,7 +106,6 @@ def handle_entry(entry: dict) -> dict:
     for field in 'number volume doi journaltitle'.split():
         if field not in entry:
             entry[field] = None
-    print(entry)
     return entry
 
 
