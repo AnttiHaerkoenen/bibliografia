@@ -86,9 +86,7 @@
     <b>Tutkimuskirjallisuus</b>
     <br><br>
     % for entry in entries:
-        %if isinstance(entry, dict):
-            ${render_item(entry)}
-            <br><br>
-        %endif
+        ${render_item(entry)}
+        <br><br>
     % endfor
 </p>
