@@ -89,7 +89,8 @@ def handle_pages(
 
 
 class Entry(UserDict):
-    fields = "ENTRYTYPE author title year".split()
+    key_fields = "ENTRYTYPE author title year".split()
+    extra_fields = 'number volume doi journaltitle publisher location'.split()
 
     def __init__(self, entry: dict):
         entry = bib_custom.convert_to_unicode(entry)
@@ -98,7 +99,7 @@ class Entry(UserDict):
         entry = handle_date(entry)
         entry = bib_custom.type(entry)
         entry = bib_custom.doi(entry)
-        for field in 'number volume doi journaltitle'.split():
+        for field in self.extra_fields:
             if field not in entry:
                 entry[field] = None
         super().__init__(self)
@@ -107,7 +108,7 @@ class Entry(UserDict):
     def __eq__(self, other):
         if not isinstance(other, Entry):
             return False
-        return all([self[field] == other[field] for field in self.fields])
+        return all([self[field] == other[field] for field in self.key_fields])
 
     @property
     def author_year(self) -> tuple:

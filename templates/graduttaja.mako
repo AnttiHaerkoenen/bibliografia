@@ -47,6 +47,11 @@
         return ""
 
     def format_publoc(entry):
+        pub, loc = entry['publisher'], entry['location']
+        if loc and pub:
+            return f" {pub}, {loc}."
+        elif pub:
+            return f" {pub}."
         return ""
 
     def article(entry):
@@ -83,6 +88,7 @@
         entry['pages'] = format_pages(entry)
         entry['doi'] = format_doi(entry)
         entry['letter'] = format_letter(entry)
+        entry['publoc'] = format_publoc(entry)
         if type_ not in styles:
             type_ = 'misc'
         return styles[type_](entry)
