@@ -28,7 +28,6 @@ def handle_authors(
                     'jr': '',
                 },
             ]
-    :param seps: Separators to use, default ' and ',
     :param entry: item_-dict
     :return: item_-dict with formatted author
     """
@@ -62,8 +61,8 @@ def handle_date(entry: dict) -> dict:
         entry['date'] = date
         entry['year'] = date[0]
     else:
-        entry['date'] = None
-        entry['year'] = None
+        entry['date'] = ''
+        entry['year'] = ''
     return entry
 
 
@@ -123,7 +122,7 @@ class Entry(UserDict):
 
 
 if __name__ == '__main__':
-    entry = Entry({
+    e = Entry({
         'urldate': '2015-12-04',
         'titleaddon': 'Twitter Developers',
         'abstract': 'Esri layers Tweets over maps to show live conversations for events like elections, weather, and natural disasters.',
@@ -132,4 +131,4 @@ if __name__ == '__main__':
         'ENTRYTYPE': 'online',
         'ID': '_esri',
     })
-    print(entry.author_year)
+    print(e.author_year)

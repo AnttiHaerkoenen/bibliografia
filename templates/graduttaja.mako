@@ -7,6 +7,8 @@
         authors = entry['author']
         if not authors:
             return "Anon."
+        if 3 < len(authors):
+            return f"{authors[0]['last']} et al."
         authors_ = []
         for a in authors:
             a['first_s'] = ' '.join(a['first'])
@@ -38,20 +40,23 @@
             return f", doi:{doi}"
         return ""
 
-    def format_duplicate_letter(entry):
+    def format_letter(entry):
         number = entry['letter_number']
         if number:
             return string.ascii_lowercase[number - 1]
         return ""
 
+    def format_publoc(entry):
+        return ""
+
     def article(entry):
         entry['numvol'] = format_numvol(entry)
-        return "{author} {year}{duplicate_letter}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
+        return "{author} {year}{letter}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
 
     def book(entry):
-        return "kirja: " + entry['ID']
+        return "{author} {year}{letter}. {title}.{publoc}".format(**entry)
 
-    def thesis(entry):
+    def phdthesis(entry):
         return "väitöskirja: " + entry['ID']
 
     def incollection(entry):
@@ -68,7 +73,7 @@
         'book': book,
         'incollection': incollection,
         'online': online,
-        'thesis': thesis,
+        'phdthesis': phdthesis,
         'misc': misc,
     }
 
@@ -77,7 +82,7 @@
         entry['author'] = format_author(entry)
         entry['pages'] = format_pages(entry)
         entry['doi'] = format_doi(entry)
-        entry['duplicate_letter'] = format_duplicate_letter(entry)
+        entry['letter'] = format_letter(entry)
         if type_ not in styles:
             type_ = 'misc'
         return styles[type_](entry)
