@@ -123,4 +123,13 @@ class Entry(UserDict):
 
 
 if __name__ == '__main__':
-    pass
+    entry = Entry({
+        'urldate': '2015-12-04',
+        'titleaddon': 'Twitter Developers',
+        'abstract': 'Esri layers Tweets over maps to show live conversations for events like elections, weather, and natural disasters.',
+        'url': 'https://dev.twitter.com/case-studies/esri-enriches-maps-tweets-and-streaming-api',
+        'title': 'Esri enriches maps with Tweets and the Streaming API',
+        'ENTRYTYPE': 'online',
+        'ID': '_esri',
+    })
+    print(entry.author_year)

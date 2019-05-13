@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from collections.abc import Sequence
 
 import bibtexparser.customization as bib_custom
 
@@ -46,7 +45,7 @@ class Bibliography:
 
         # delete duplicates
         duplicates = []
-        last_entry = None
+        last_entry = dict()
         for k, entry in self.entries_dict.items():
             if entry == last_entry:
                 duplicates.append(k)
