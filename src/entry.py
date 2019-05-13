@@ -90,7 +90,7 @@ def handle_pages(
 
 class Entry(UserDict):
     key_fields = "ENTRYTYPE author title year".split()
-    extra_fields = 'number volume doi journaltitle publisher location'.split()
+    extra_fields = 'number volume doi journaltitle publisher location urldate'.split()
 
     def __init__(self, entry: dict):
         entry = bib_custom.convert_to_unicode(entry)

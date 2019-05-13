@@ -15,6 +15,9 @@
             authors_.append("{last}, {first_s} {von}".format(**a))
         return ' & '.join(authors_)
 
+    def format_editor(entry):
+        return ""
+
     def format_pages(entry):
         pages = entry['pages']
         if not pages:
@@ -54,6 +57,18 @@
             return f" {pub}."
         return ""
 
+    def format_urldate(entry):
+        urldate = entry['urldate']
+        if urldate:
+            return f" Haettu: {urldate}."
+        return ""
+
+    def format_booktitle(entry):
+        title = entry['booktitle']
+        if title:
+            return "Teoksessa {title}"
+        return ""
+
     def article(entry):
         entry['numvol'] = format_numvol(entry)
         return "{author} {year}{letter}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
@@ -62,16 +77,18 @@
         return "{author} {year}{letter}. {title}.{publoc}".format(**entry)
 
     def phdthesis(entry):
-        return "väitöskirja: " + entry['ID']
+        return book(entry) + " Väitöskirja."
 
     def incollection(entry):
-        return "kokoelmassa: " + entry['ID']
+        entry['booktitle'] = format_booktitle(entry)
+        return "{author} {year}{letter}. {title}. {booktitle}{editor}{pages}"
 
     def online(entry):
-        return "netistä: " + entry['ID']
+        entry['urldate'] = format_urldate(entry)
+        return "{title}. <{url}>.{urldate}".format(**entry)
 
     def misc(entry):
-        return "sekalaista: " + entry['ID']
+        return "{title}".format(**entry)
 
     styles = {
         'article': article,
@@ -85,6 +102,7 @@
     def render_item(entry):
         type_ = entry['ENTRYTYPE']
         entry['author'] = format_author(entry)
+        entry['editor'] = format_editor(entry)
         entry['pages'] = format_pages(entry)
         entry['doi'] = format_doi(entry)
         entry['letter'] = format_letter(entry)
