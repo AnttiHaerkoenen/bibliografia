@@ -1,5 +1,6 @@
 from collections import UserDict
 from collections.abc import Sequence
+from abc import ABC
 
 import bibtexparser.customization as bib_custom
 
@@ -89,26 +90,27 @@ def handle_pages(
 
 
 class Entry(UserDict):
-    key_fields = "ENTRYTYPE author title year".split()
-    extra_fields = 'number volume doi journaltitle publisher location urldate'.split()
+    @classmethod
+    def entry_factory(cls, data_: dict) -> UserDict:
+        return next(c for c in cls.__subclasses__() if c.__name__.lower() == data_['ENTRYTYPE'].lower())(data_)
 
-    def __init__(self, entry: dict):
-        entry = bib_custom.convert_to_unicode(entry)
-        entry = handle_authors(entry)
-        entry = handle_pages(entry)
-        entry = handle_date(entry)
-        entry = bib_custom.type(entry)
-        entry = bib_custom.doi(entry)
-        for field in self.extra_fields:
-            if field not in entry:
-                entry[field] = None
+    def __init__(self, data_: dict):
+        data_ = bib_custom.convert_to_unicode(data_)
+        data_ = handle_authors(data_)
+        data_ = handle_pages(data_)
+        data_ = handle_date(data_)
+        data_ = bib_custom.type(data_)
+        data_ = bib_custom.doi(data_)
+        for field in self.optional_fields:
+            if field not in data_:
+                data_[field] = None
         super().__init__(self)
-        self.data = entry
+        self.data = data_
 
     def __eq__(self, other):
         if not isinstance(other, Entry):
             return False
-        return all([self[field] == other[field] for field in self.key_fields])
+        return all([self[field] == other[field] for field in self.required_fields])
 
     @property
     def author_year(self) -> tuple:
@@ -122,8 +124,165 @@ class Entry(UserDict):
         return author, self['year']
 
 
+class Article(Entry):
+    required_fields = {
+        'author',
+        'title',
+        'year',
+        'journal',
+        'volume',
+    }
+    optional_fields = {
+        'number',
+        'pages',
+        'month',
+        'doi',
+        'note',
+        'key',
+    }
+
+
+class Book(Entry):
+    required_fields = {
+        {'author', 'editor'},
+        'title',
+        'publisher',
+        'year',
+    }
+    optional_fields = {
+        'volume',
+        'number',
+        'series',
+        'address',
+        'edition',
+        'month',
+        'note',
+        'key',
+        'url',
+    }
+
+
+class Booklet(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Conference(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Inbook(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Incollection(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Inproceedings(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Manual(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Mastersthesis(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Misc(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Phdthesis(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Proceedings(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Techreport(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Unpublished(Entry):
+    required_fields = set(
+        '',
+    )
+    optional_fields = set(
+        '',
+    )
+
+
+class Online(Entry):
+    required_fields = {
+        'title',
+        'url',
+        'urldate',
+    }
+    optional_fields = {
+        'doi',
+    }
+
+
 if __name__ == '__main__':
-    e = Entry({
+    e = Article({
         'urldate': '2015-12-04',
         'titleaddon': 'Twitter Developers',
         'abstract': 'Esri layers Tweets over maps to show live conversations for events like elections, weather, and natural disasters.',
@@ -132,4 +291,4 @@ if __name__ == '__main__':
         'ENTRYTYPE': 'online',
         'ID': '_esri',
     })
-    print(e.author_year)
+    print(e.required_fields)

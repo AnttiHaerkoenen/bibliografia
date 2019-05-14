@@ -2,6 +2,10 @@
   <dictionary name="antth">
     <words>
       <w>fname</w>
+      <w>mastersthesis</w>
+      <w>phdthesis</w>
+      <w>techreport</w>
+      <w>urldate</w>
     </words>
   </dictionary>
 </component>

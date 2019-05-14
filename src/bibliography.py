@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import bibtexparser.customization as bib_custom
 
-from .entry import Entry
+from .entries import Entry
 
 
 class Bibliography:

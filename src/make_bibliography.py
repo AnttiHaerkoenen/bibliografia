@@ -63,7 +63,7 @@ def main():
 
 if __name__ == '__main__':
     make_bibliography(
-        database=r'../data/bib.bib',
+        database=r'../data/refworks.bib',
         output=r'../output/testi.html',
         style='graduttaja',
     )
