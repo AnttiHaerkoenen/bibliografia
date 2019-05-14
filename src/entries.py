@@ -9,10 +9,10 @@ def handle_authors(
         entry: dict,
 ) -> dict:
     """
-    Sets 'author' to:
+    Sets 'author' and 'editor' each to:
         1) list of dicts of lists
         (each author passed through bibtexparser.customization.splitname)
-        2) None, if 'author' not in item_
+        2) None, if 'author'/'editor' not in item_
 
     Example:
         item_['author'] = [
@@ -32,38 +32,18 @@ def handle_authors(
     :param entry: item_-dict
     :return: item_-dict with formatted author
     """
-    if 'author' in entry:
-        authors = entry['author'].split(' and ')
-        authors_ = []
-        for au in authors:
-            au_dict = bib_custom.splitname(au)
-            au_dict_new = {k: (v[0] if v else '') for k, v in au_dict.items()}
-            au_dict_new['first'] = au_dict['first']
-            authors_.append(au_dict_new)
-        entry['author'] = authors_
-    else:
-        entry['author'] = None
-    return entry
-
-
-def handle_date(entry: dict) -> dict:
-    """
-    Sets 'date' to:
-        1) list of year, month and day
-        2) None if 'date' not in item_
-    Sets 'year' to:
-        1) date[0]
-        2) None if 'date' not in item_
-    :param entry:
-    :return:
-    """
-    if 'date' in entry:
-        date = entry['date'].split('-')
-        entry['date'] = date
-        entry['year'] = date[0]
-    else:
-        entry['date'] = ''
-        entry['year'] = ''
+    for field in 'author editor'.split():
+        if field in entry:
+            authors = entry[field].split(' and ')
+            authors_ = []
+            for au in authors:
+                au_dict = bib_custom.splitname(au)
+                au_dict_new = {k: (v[0] if v else '') for k, v in au_dict.items()}
+                au_dict_new['first'] = au_dict['first']
+                authors_.append(au_dict_new)
+            entry[field] = authors_
+        else:
+            entry[field] = None
     return entry
 
 
@@ -91,37 +71,64 @@ def handle_pages(
 
 class Entry(UserDict):
     @classmethod
-    def entry_factory(cls, data_: dict) -> UserDict:
-        return next(c for c in cls.__subclasses__() if c.__name__.lower() == data_['ENTRYTYPE'].lower())(data_)
+    def entry_factory(cls, data_: dict):
+        return next(
+            c for c in cls.__subclasses__()
+            if c.__name__.lower() == data_['ENTRYTYPE'].lower()
+        )(data_)
 
     def __init__(self, data_: dict):
         data_ = bib_custom.convert_to_unicode(data_)
+        for k, v in data_.items():
+            if isinstance(v, str):
+                data_[k] = v.replace('<br>', '').strip()
         data_ = handle_authors(data_)
         data_ = handle_pages(data_)
-        data_ = handle_date(data_)
         data_ = bib_custom.type(data_)
         data_ = bib_custom.doi(data_)
-        for field in self.optional_fields:
-            if field not in data_:
-                data_[field] = None
         super().__init__(self)
         self.data = data_
+        for field in set.union(self.required_fields, self.optional_fields):
+            self[field] = self.data.get(field, None)
 
     def __eq__(self, other):
         if not isinstance(other, Entry):
             return False
-        return all([self[field] == other[field] for field in self.required_fields])
+        for field in self.required_fields:
+            if type(field) == set:
+                if all([self[f] != self[f] for f in field]):
+                    return False
+            else:
+                if self[field] != other[field]:
+                    return False
+        return True
+
+    def __lt__(self, other):
+        author, other_author = self.author_year[0], other.author_year[0]
+        if not author:
+            return True
+        if not other_author:
+            return False
+        if author < other_author:
+            return True
+        if self['author'] == other['author']:
+            return self['year'] < other['year']
+
+    def __missing__(self, _):
+        return None
 
     @property
     def author_year(self) -> tuple:
-        author = self['author']
-        if not author:
+        author, editor = self['author'], self['editor']
+        if not author or editor:
             author = tuple()
+        elif not author:
+            author = editor
         elif len(author) <= 3:
             author = tuple([au['last'] for au in author])
         else:
             author = author[0]['last'], 'et al.'
-        return author, self['year']
+        return author, self.get('year', '')
 
 
 class Article(Entry):
@@ -144,11 +151,12 @@ class Article(Entry):
 
 class Book(Entry):
     required_fields = {
-        {'author', 'editor'},
         'title',
         'publisher',
         'year',
     }
+    selection = frozenset('author editor'.split())
+    required_fields.add(selection)
     optional_fields = {
         'volume',
         'number',
@@ -161,113 +169,115 @@ class Book(Entry):
         'url',
     }
 
+    def __init__(self, data_: dict):
+        super().__init__(data_)
+        for field in self.selection:
+            self[field] = self.get(field, None)
+
 
 class Booklet(Entry):
-    required_fields = set(
-        '',
-    )
-    optional_fields = set(
-        '',
-    )
-
-
-class Conference(Entry):
-    required_fields = set(
-        '',
-    )
-    optional_fields = set(
-        '',
-    )
+    required_fields = {
+        'title',
+    }
+    optional_fields = {
+        'author',
+        'howpublished',
+        'address',
+        'month',
+        'year',
+        'note',
+        'key',
+    }
 
 
 class Inbook(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Incollection(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Inproceedings(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Manual(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Mastersthesis(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Misc(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Phdthesis(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Proceedings(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Techreport(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Unpublished(Entry):
-    required_fields = set(
+    required_fields = {
         '',
-    )
-    optional_fields = set(
+    }
+    optional_fields = {
         '',
-    )
+    }
 
 
 class Online(Entry):

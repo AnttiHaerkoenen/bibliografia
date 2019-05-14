@@ -2,6 +2,10 @@
   <dictionary name="antth">
     <words>
       <w>fname</w>
+      <w>howpublished</w>
+      <w>inbook</w>
+      <w>incollection</w>
+      <w>inproceedings</w>
       <w>mastersthesis</w>
       <w>phdthesis</w>
       <w>techreport</w>

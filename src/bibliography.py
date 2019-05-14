@@ -6,10 +6,17 @@ from .entries import Entry
 
 
 class Bibliography:
-    def __init__(self, entries: dict):
-        self.entries_dict: OrderedDict = OrderedDict(
-            {k: Entry(v) for k, v in entries.items()}
-        )
+    def __init__(self, entries: dict or list):
+        if isinstance(entries, dict):
+            self.entries_dict: OrderedDict = OrderedDict(
+                {k: Entry.entry_factory(v) for k, v in entries.items()}
+            )
+        elif isinstance(entries, list):
+            self.entries_dict: OrderedDict = OrderedDict(
+                {e['ID']: Entry.entry_factory(e) for e in entries}
+            )
+        else:
+            raise TypeError(f"Expected list or dict, got {type(entries)}")
         self._handle_duplicates()
 
     @property
@@ -37,7 +44,7 @@ class Bibliography:
     def sort(self):
         self.entries_dict = OrderedDict(sorted(
             self.entries_dict.items(),
-            key=lambda key_val: key_val[1].author_year,
+            key=lambda key_val: key_val[1]
         ))
 
     def _handle_duplicates(self):
@@ -45,7 +52,7 @@ class Bibliography:
 
         # delete duplicates
         duplicates = []
-        last_entry = dict()
+        last_entry = object()
         for k, entry in self.entries_dict.items():
             if entry == last_entry:
                 duplicates.append(k)

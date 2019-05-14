@@ -57,12 +57,6 @@
             return f" {pub}."
         return ""
 
-    def format_urldate(entry):
-        urldate = entry['urldate']
-        if urldate:
-            return f" Haettu: {urldate}."
-        return ""
-
     def format_booktitle(entry):
         title = entry['booktitle']
         if title:
@@ -71,7 +65,7 @@
 
     def article(entry):
         entry['numvol'] = format_numvol(entry)
-        return "{author} {year}{letter}. {title}. {journaltitle}{numvol}{pages}{doi}.".format(**entry)
+        return "{author} {year}{letter}. {title}. {journal}{numvol}{pages}{doi}.".format(**entry)
 
     def book(entry):
         return "{author} {year}{letter}. {title}.{publoc}".format(**entry)
@@ -83,10 +77,6 @@
         entry['booktitle'] = format_booktitle(entry)
         return "{author} {year}{letter}. {title}. {booktitle}{editor}{pages}"
 
-    def online(entry):
-        entry['urldate'] = format_urldate(entry)
-        return "{title}. <{url}>.{urldate}".format(**entry)
-
     def misc(entry):
         return "{title}".format(**entry)
 
@@ -94,21 +84,18 @@
         'article': article,
         'book': book,
         'incollection': incollection,
-        'online': online,
         'phdthesis': phdthesis,
         'misc': misc,
     }
 
     def render_item(entry):
-        type_ = entry['ENTRYTYPE']
+        type_ = entry.__class__.__name__.lower()
         entry['author'] = format_author(entry)
         entry['editor'] = format_editor(entry)
         entry['pages'] = format_pages(entry)
         entry['doi'] = format_doi(entry)
         entry['letter'] = format_letter(entry)
         entry['publoc'] = format_publoc(entry)
-        if type_ not in styles:
-            type_ = 'misc'
         return styles[type_](entry)
 %>
 <p style="font-size: 12px; row-gap: 1.5px">

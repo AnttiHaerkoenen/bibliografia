@@ -11,7 +11,7 @@ from src.bibliography import Bibliography
 TEMPLATE_DIR = r'../templates'
 TEMPLATES = {
     'graduttaja': 'graduttaja.mako',
-    # 'terra': 'terra.mako',
+    'terra': 'terra.mako',
 }
 
 
@@ -21,13 +21,13 @@ def make_bibliography(
         style,
 ):
     parser = bibtexparser.bparser.BibTexParser()
-    parser.ignore_nonstandard_types = False
+    parser.ignore_nonstandard_types = True
     parser.homogenize_fields = True
     parser.add_missing_from_crossref = True
     with open(database) as fopen:
         database = bibtexparser.load(fopen, parser=parser)
-    articles = list(filter(lambda e: e['ENTRYTYPE'] in 'article incollection misc book'.split(), database.entries))
-    entries = Bibliography(database.entries_dict)
+    articles = list(filter(lambda e: e['ENTRYTYPE'] in 'article'.split(), database.entries))
+    entries = Bibliography(articles)
     os.chdir(TEMPLATE_DIR)
     look_up = TemplateLookup(directories=TEMPLATE_DIR, input_encoding='utf-8')
     template = Template(filename=TEMPLATES[style], lookup=look_up)
@@ -65,6 +65,6 @@ if __name__ == '__main__':
     make_bibliography(
         database=r'../data/refworks.bib',
         output=r'../output/testi.html',
-        style='graduttaja',
+        style='terra',
     )
     # main()
