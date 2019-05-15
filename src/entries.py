@@ -146,6 +146,7 @@ class Article(Entry):
         'doi',
         'note',
         'key',
+        'doi',
     }
 
 
@@ -155,8 +156,8 @@ class Book(Entry):
         'publisher',
         'year',
     }
-    selection = frozenset('author editor'.split())
-    required_fields.add(selection)
+    author_selection = frozenset('author editor'.split())
+    required_fields.add(author_selection)
     optional_fields = {
         'volume',
         'number',
@@ -167,11 +168,12 @@ class Book(Entry):
         'note',
         'key',
         'url',
+        'doi',
     }
 
     def __init__(self, data_: dict):
         super().__init__(data_)
-        for field in self.selection:
+        for field in self.author_selection:
             self[field] = self.get(field, None)
 
 
@@ -187,106 +189,198 @@ class Booklet(Entry):
         'year',
         'note',
         'key',
+        'doi',
     }
 
 
 class Inbook(Entry):
     required_fields = {
-        '',
+        'title',
+        'publisher',
+        'year',
     }
+    author_selection = frozenset('author editor'.split())
+    chapter_selection = frozenset('chapter pages'.split())
+    required_fields.add(author_selection)
+    required_fields.add(chapter_selection)
     optional_fields = {
-        '',
+        'volume',
+        'number',
+        'series',
+        'type',
+        'address',
+        'edition',
+        'month',
+        'note',
+        'doi',
     }
+
+    def __init__(self, data_: dict):
+        super().__init__(data_)
+        for field in frozenset.union(self.author_selection, self.chapter_selection):
+            self[field] = self.get(field, None)
 
 
 class Incollection(Entry):
     required_fields = {
-        '',
+        'author',
+        'title',
+        'booktitle',
+        'publisher',
+        'year',
     }
     optional_fields = {
-        '',
+        'editor',
+        'volume',
+        'number',
+        'series',
+        'pages',
+        'address',
+        'month',
+        'organization',
+        'publisher',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Inproceedings(Entry):
     required_fields = {
-        '',
+        'author',
+        'title',
+        'booktitle',
+        'year',
     }
     optional_fields = {
-        '',
+        'editor',
+        'volume',
+        'number',
+        'series',
+        'pages',
+        'address',
+        'month',
+        'organization',
+        'publisher',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Manual(Entry):
     required_fields = {
-        '',
+        'title',
     }
     optional_fields = {
-        '',
+        'author',
+        'organization',
+        'address',
+        'edition',
+        'month',
+        'year',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Mastersthesis(Entry):
     required_fields = {
-        '',
+        'author',
+        'title',
+        'school',
+        'year',
     }
     optional_fields = {
-        '',
+        'type',
+        'address',
+        'month',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Misc(Entry):
-    required_fields = {
-        '',
-    }
+    required_fields = {}
     optional_fields = {
-        '',
+        'author',
+        'title',
+        'howpublished',
+        'month',
+        'year',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Phdthesis(Entry):
     required_fields = {
-        '',
+        'author',
+        'title',
+        'school',
+        'year',
     }
     optional_fields = {
-        '',
+        'type',
+        'address',
+        'month',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Proceedings(Entry):
     required_fields = {
-        '',
+        'title',
+        'year',
     }
     optional_fields = {
-        '',
+        'editor',
+        'volume',
+        'number',
+        'series',
+        'address',
+        'month',
+        'publisher',
+        'organization',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Techreport(Entry):
     required_fields = {
-        '',
+        'author',
+        'title',
+        'institution',
+        'year',
     }
     optional_fields = {
-        '',
+        'type',
+        'number',
+        'address',
+        'month',
+        'note',
+        'key',
+        'doi',
     }
 
 
 class Unpublished(Entry):
     required_fields = {
-        '',
-    }
-    optional_fields = {
-        '',
-    }
-
-
-class Online(Entry):
-    required_fields = {
+        'author',
         'title',
-        'url',
-        'urldate',
+        'note',
     }
     optional_fields = {
+        'month',
+        'year',
+        'key',
         'doi',
     }
 
