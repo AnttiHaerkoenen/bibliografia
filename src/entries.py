@@ -1,6 +1,5 @@
 from collections import UserDict
 from collections.abc import Sequence
-from abc import ABC
 
 import bibtexparser.customization as bib_custom
 
