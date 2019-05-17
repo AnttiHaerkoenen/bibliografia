@@ -4,16 +4,7 @@
     import string
 
     def format_author(entry):
-        authors = entry['author']
-        if not authors:
-            return "Anon."
-        if 3 < len(authors):
-            return f"{authors[0]['last']} et al."
-        authors_ = []
-        for a in authors:
-            a['first_s'] = ' '.join(a['first'])
-            authors_.append("{last}, {first_s} {von}".format(**a))
-        return ' & '.join(authors_)
+        return ""
 
     def format_editor(entry):
         return ""
